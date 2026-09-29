@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f3b36">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Ludothèque</title>
+<style>
+:root{--bg:#f5f0e6;--card:#fffdf8;--ink:#2a2622;--muted:#7a7066;--line:#e6dfd1;--soft:#efe8da;--accent:#c8553d;--felt:#1f3b36;--felt-ink:#f5f0e6;--gold:#d9a441;--danger:#b23a2e}
+@media (prefers-color-scheme:dark){:root{--bg:#131715;--card:#1c211f;--ink:#ece6da;--muted:#9b948a;--line:#2b322f;--soft:#252b28;--felt:#0f1e1b;--danger:#e0705f}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px}
+body{min-height:100vh;overscroll-behavior-y:contain;user-select:none;-webkit-user-select:none}
+input,textarea{user-select:text;-webkit-user-select:text}
+header{position:sticky;top:0;z-index:5;background:var(--felt);color:var(--felt-ink);padding:calc(env(safe-area-inset-top) + 14px) 12px 14px 18px;display:flex;align-items:center;justify-content:space-between}
+header h1{margin:0;font-size:21px;font-weight:700}
+.iconbtn{background:none;border:0;color:inherit;padding:8px;border-radius:10px;display:grid;place-items:center}
+.iconbtn svg{width:24px;height:24px}
+main{padding:14px 16px calc(100px + env(safe-area-inset-bottom));max-width:640px;margin:0 auto}
+nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:6;background:var(--card);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs button{background:none;border:0;color:var(--muted);padding:9px 0 8px;display:flex;flex-direction:column;align-items:center;gap:3px;font:inherit;font-size:11.5px;font-weight:600}
+nav.tabs button.on{color:var(--accent)}
+nav.tabs svg{width:24px;height:24px}
+.fab{position:fixed;right:18px;bottom:calc(78px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:18px;background:var(--accent);color:#fff;border:0;box-shadow:0 6px 18px rgba(0,0,0,.25);display:grid;place-items:center;z-index:6}
+.fab svg{width:28px;height:28px}
+.fab[hidden]{display:none}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:9px}
+.item{display:flex;width:100%;align-items:center;gap:12px;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.item:active{transform:scale(.99)}
+.grow{flex:1;min-width:0}
+.name{font-weight:700;font-size:16.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meta{color:var(--muted);font-size:13.5px;margin-top:2px}
+.muted{color:var(--muted)}
+.center{text-align:center}
+.between{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.badge{font-size:12.5px;font-weight:700;background:var(--soft);padding:5px 9px;border-radius:20px;white-space:nowrap}
+.badge.none{background:none;color:var(--muted);font-weight:500}
+.toolbar input[type=search]{margin:0}
+.chips{display:flex;gap:8px;margin:10px 0 4px}
+.chip{font:inherit;font-size:13.5px;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--muted);padding:7px 13px;border-radius:20px}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.count{font-size:13px;color:var(--muted);margin:8px 2px}
+h2{margin:4px 0 2px;font-size:21px}
+h3{font-size:12.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:22px 2px 10px}
+h3.month:first-child{margin-top:4px}
+.res{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:13px;background:var(--soft);padding:4px 9px;border-radius:20px}
+.pill.win{background:color-mix(in srgb,var(--gold) 28%,var(--card));font-weight:600}
+.pill b{font-weight:800}
+.av{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;color:#fff;font-size:11.5px;font-weight:800;flex:none}
+.av.lg{width:40px;height:40px;font-size:17px}
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty .big{font-size:44px}
+.empty b{display:block;color:var(--ink);font-size:18px;margin:10px 0 6px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.tiles.three{grid-template-columns:repeat(3,1fr);margin-top:14px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 13px}
+.tiles.three .tile{background:var(--soft);border:0;padding:10px}
+.tile .v{font-size:25px;font-weight:800;line-height:1.1}
+.tiles.three .tile .v{font-size:19px}
+.tile .l{font-size:12.5px;color:var(--muted);margin-top:3px}
+.bar{display:grid;grid-template-columns:1fr auto;gap:5px 10px;padding:4px 0 9px;width:100%;background:none;border:0;font:inherit;color:inherit;text-align:left}
+.bar .track{grid-column:1/-1;height:8px;background:var(--soft);border-radius:4px;overflow:hidden}
+.bar .fill{height:100%;background:var(--accent);border-radius:4px}
+.rank{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.rank:last-child{border:0}
+.rank .pct{font-weight:800;min-width:46px;text-align:right}
+.winlist{display:flex;flex-wrap:wrap;gap:6px}
+/* sheet */
+#sheet{position:fixed;inset:0;z-index:20;pointer-events:none}
+#sheet .backdrop{position:absolute;inset:0;background:rgba(0,0,0,.45);opacity:0;transition:opacity .2s}
+#sheet .panel{position:absolute;left:0;right:0;bottom:0;max-width:640px;margin:0 auto;max-height:90vh;overflow:auto;background:var(--card);border-radius:20px 20px 0 0;padding:10px 18px calc(22px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .25s ease}
+#sheet.open{pointer-events:auto}
+#sheet.open .backdrop{opacity:1}
+#sheet.open .panel{transform:none}
+.handle{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 12px}
+label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:14px 0 0}
+input,select,textarea{display:block;width:100%;margin-top:6px;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 12px}
+textarea{resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.plist{margin-top:6px}
+.prow{display:grid;grid-template-columns:1fr 100px;align-items:center;gap:10px;padding:6px 8px;border-radius:10px}
+.prow.on{background:var(--soft)}
+.pcheck{display:flex;align-items:center;gap:10px;margin:0;color:var(--ink);font-size:15.5px;font-weight:500;padding:4px 0}
+.pcheck input{width:20px;height:20px;margin:0;accent-color:var(--accent);flex:none}
+.prow .score{margin:0;padding:8px 10px;opacity:.4}
+.prow.on .score{opacity:1}
+.warn{background:color-mix(in srgb,var(--gold) 22%,var(--card));padding:9px 12px;border-radius:10px;font-size:13.5px;margin:10px 0 0}
+.warn[hidden]{display:none}
+.swatches{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.swatches label{margin:0}
+.swatches input{display:none}
+.swatches span{display:block;width:34px;height:34px;border-radius:50%;border:3px solid transparent}
+.swatches input:checked+span{border-color:var(--ink)}
+.btn{font:inherit;font-weight:700;border-radius:12px;padding:13px 16px;border:0;text-align:center;cursor:pointer;display:block;margin:0}
+.primary{background:var(--accent);color:#fff}
+.ghost{background:var(--soft);color:var(--ink)}
+.danger{color:var(--danger)}
+.actions{display:flex;gap:10px;margin-top:22px}
+.actions .btn{flex:1}
+.stack{display:grid;gap:10px;margin:16px 0}
+#toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 72px);transform:translate(-50%,-10px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;transition:.2s;z-index:30;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">Collection</h1>
+  <button class="iconbtn" data-act="settings" aria-label="Sauvegarde">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+  </button>
+</header>
+
+<main id="view"></main>
+
+<button id="fab" class="fab" data-act="add" aria-label="Ajouter">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+</button>
+
+<nav class="tabs">
+  <button data-tab="games"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="13" width="18" height="7" rx="1.5"/><rect x="5" y="7" width="14" height="6" rx="1.5"/><rect x="7" y="3" width="10" height="4" rx="1"/></svg>Collection</button>
+  <button data-tab="plays"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="16" cy="16" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></svg>Parties</button>
+  <button data-tab="players"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14.5c2.3 0 4 1.5 4.6 4"/></svg>Joueurs</button>
+  <button data-tab="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Stats</button>
+</nav>
+
+<div id="sheet"><div class="backdrop" data-act="close"></div><div class="panel"><div class="handle"></div><div id="sheet-body"></div></div></div>
+<div id="toast"></div>
+
+<script>
+const KEY = 'ludotheque-v1';
+const COLORS = ['#c8553d','#2a7f7a','#d9a441','#5b6ee1','#8e5ea2','#3f8f4f','#d46a92','#6b7b8c'];
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const byName = (a, b) => a.name.localeCompare(b.name, 'fr', {sensitivity: 'base'});
+const plural = (n, w) => `${n} ${w}${n > 1 ? 's' : ''}`;
+
+let db = load();
+const state = {tab: 'games', search: '', sort: 'name'};
+
+function load() {
+  try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && Array.isArray(d.games)) return {games: d.games, players: d.players || [], plays: d.plays || []}; } catch (e) {}
+  return {games: [], players: [], plays: []};
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { toast('Enregistrement impossible'); }
+}
+
+/* ---------- helpers ---------- */
+const game = id => db.games.find(g => g.id === id);
+const player = id => db.players.find(p => p.id === id);
+const pname = id => player(id)?.name || 'Joueur supprimé';
+function today() { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
+const asDate = s => new Date(s + 'T12:00:00');
+const shortDate = s => asDate(s).toLocaleDateString('fr-FR', {day: 'numeric', month: 'short'}) + (s.slice(0, 4) !== today().slice(0, 4) ? ' ' + s.slice(0, 4) : '');
+const monthLabel = s => { const m = asDate(s).toLocaleDateString('fr-FR', {month: 'long', year: 'numeric'}); return m.charAt(0).toUpperCase() + m.slice(1); };
+function ago(s) {
+  const days = Math.round((asDate(today()) - asDate(s)) / 864e5);
+  if (days <= 0) return "aujourd'hui";
+  if (days < 31) return `il y a ${plural(days, 'jour')}`;
+  if (days < 365) return `il y a ${Math.round(days / 30.4)} mois`;
+  const y = Math.floor(days / 365); return `il y a ${plural(y, 'an')}`;
+}
+function playersLabel(g) { return g.min === g.max ? plural(g.min, 'joueur') : `${g.min}–${g.max} joueurs`; }
+function gameMeta(g) { return playersLabel(g) + (g.duration ? ` · ${g.duration} min` : ''); }
+function avatar(pid, cls = '') {
+  const p = player(pid);
+  return `<span class="av ${cls}" style="background:${p ? p.color : '#999'}">${esc((p ? p.name : '?').trim().charAt(0).toUpperCase())}</span>`;
+}
+const sortedPlays = () => db.plays.slice().sort((a, b) => b.date.localeCompare(a.date) || (b.created || 0) - (a.created || 0));
+
+function winners(play) {
+  const scored = play.results.filter(r => typeof r.score === 'number');
+  if (!scored.length) return [];
+  const max = Math.max(...scored.map(r => r.score));
+  return scored.filter(r => r.score === max).map(r => r.playerId);
+}
+function gameStats(id) {
+  const plays = sortedPlays().filter(p => p.gameId === id);
+  let record = null;
+  plays.forEach(p => p.results.forEach(r => { if (typeof r.score === 'number' && (!record || r.score > record.score)) record = {score: r.score, playerId: r.playerId}; }));
+  return {plays, count: plays.length, last: plays[0]?.date || null, record};
+}
+function playerStats() {
+  const s = {};
+  db.players.forEach(p => s[p.id] = {plays: 0, multi: 0, wins: 0});
+  db.plays.forEach(p => {
+    const multi = p.results.length > 1, w = winners(p);
+    p.results.forEach(r => {
+      const x = s[r.playerId]; if (!x) return;
+      x.plays++;
+      if (multi) { x.multi++; if (w.includes(r.playerId)) x.wins++; }
+    });
+  });
+  return s;
+}
+
+/* ---------- rendering ---------- */
+const TITLES = {games: 'Collection', plays: 'Parties', players: 'Joueurs', stats: 'Statistiques'};
+function render() {
+  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === state.tab));
+  $('#title').textContent = TITLES[state.tab];
+  $('#fab').hidden = state.tab === 'stats';
+  ({games: renderGames, plays: renderPlays, players: renderPlayers, stats: renderStats})[state.tab]();
+}
+const empty = (icon, title, text) => `<div class="empty"><div class="big">${icon}</div><b>${title}</b>${text}</div>`;
+
+function renderGames() {
+  const v = $('#view');
+  if (!db.games.length) { v.innerHTML = empty('📦', 'Ta ludothèque est vide', 'Ajoute ton premier jeu avec le bouton +.'); return; }
+  const sorts = [['name', 'A–Z'], ['most', 'Plus joués'], ['recent', 'Récents']];
+  v.innerHTML = `<div class="toolbar"><input id="search" type="search" placeholder="Rechercher un jeu" value="${esc(state.search)}">
+    <div class="chips">${sorts.map(([k, l]) => `<button class="chip ${state.sort === k ? 'on' : ''}" data-sort="${k}">${l}</button>`).join('')}</div></div>
+    <p class="count" id="gcount"></p><div id="glist"></div>`;
+  $('#search').addEventListener('input', e => { state.search = e.target.value; renderGameList(); });
+  renderGameList();
+}
+function renderGameList() {
+  const q = state.search.trim().toLowerCase();
+  const st = Object.fromEntries(db.games.map(g => [g.id, gameStats(g.id)]));
+  const list = db.games.filter(g => g.name.toLowerCase().includes(q));
+  if (state.sort === 'name') list.sort(byName);
+  if (state.sort === 'most') list.sort((a, b) => st[b.id].count - st[a.id].count || byName(a, b));
+  if (state.sort === 'recent') list.sort((a, b) => (st[b.id].last || '').localeCompare(st[a.id].last || '') || byName(a, b));
+  $('#gcount').textContent = q ? `${plural(list.length, 'résultat')}` : `${plural(db.games.length, 'jeu')}`.replace('jeus', 'jeux');
+  $('#glist').innerHTML = list.map(g => {
+    const s = st[g.id];
+    return `<button class="card item" data-game="${g.id}"><div class="grow"><div class="name">${esc(g.name)}</div><div class="meta">${gameMeta(g)}</div></div>
+      <span class="badge ${s.count ? '' : 'none'}">${s.count ? plural(s.count, 'partie') : 'Jamais joué'}</span></button>`;
+  }).join('') || '<p class="muted center">Aucun jeu ne correspond.</p>';
+}
+
+function playCard(p) {
+  const g = game(p.gameId), w = winners(p);
+  const res = p.results.slice().sort((a, b) => (b.score ?? -1e9) - (a.score ?? -1e9));
+  return `<button class="card item" data-play="${p.id}"><div class="grow">
+    <div class="between"><span class="name">${esc(g ? g.name : 'Jeu supprimé')}</span><span class="meta">${shortDate(p.date)}</span></div>
+    <div class="res">${res.map(r => `<span class="pill ${w.includes(r.playerId) ? 'win' : ''}">${w.includes(r.playerId) ? '🏆' : avatar(r.playerId)} ${esc(pname(r.playerId))}${typeof r.score === 'number' ? ` <b>${r.score}</b>` : ''}</span>`).join('')}</div>
+    ${p.note ? `<div class="meta" style="margin-top:8px">${esc(p.note)}</div>` : ''}</div></button>`;
+}
+function renderPlays() {
+  const v = $('#view');
+  if (!db.plays.length) { v.innerHTML = empty('🎲', 'Aucune partie enregistrée', db.games.length ? 'Note ta prochaine partie avec le bouton +.' : "Commence par ajouter un jeu dans l'onglet Collection."); return; }
+  let html = '', cur = '';
+  sortedPlays().forEach(p => { const m = monthLabel(p.date); if (m !== cur) { html += `<h3 class="month">${m}</h3>`; cur = m; } html += playCard(p); });
+  v.innerHTML = html;
+}
+
+function renderPlayers() {
+  const v = $('#view');
+  if (!db.players.length) { v.innerHTML = empty('🧑‍🤝‍🧑', 'Aucun joueur', 'Ajoute les personnes avec qui tu joues, toi compris.'); return; }
+  const st = playerStats();
+  v.innerHTML = db.players.slice().sort(byName).map(p => {
+    const s = st[p.id];
+    return `<button class="card item" data-player="${p.id}">${avatar(p.id, 'lg')}<div class="grow"><div class="name">${esc(p.name)}</div>
+      <div class="meta">${plural(s.plays, 'partie')} · ${plural(s.wins, 'victoire')}</div></div></button>`;
+  }).join('');
+}
+
+function renderStats() {
+  const v = $('#view');
+  if (!db.games.length && !db.plays.length) { v.innerHTML = empty('📊', 'Pas encore de statistiques', 'Elles apparaîtront dès tes premières parties.'); return; }
+  const minutes = db.plays.reduce((s, p) => s + (game(p.gameId)?.duration || 0), 0);
+  const time = minutes < 60 ? `${minutes} min` : `${Math.round(minutes / 60)} h`;
+  const gs = db.games.map(g => ({g, ...gameStats(g.id)}));
+  const never = gs.filter(x => !x.count).length;
+  const top = gs.filter(x => x.count).sort((a, b) => b.count - a.count).slice(0, 5);
+  const max = top[0]?.count || 1;
+  const pst = playerStats();
+  const ranking = db.players.filter(p => pst[p.id].multi).map(p => ({p, ...pst[p.id], rate: pst[p.id].wins / pst[p.id].multi}))
+    .sort((a, b) => b.wins - a.wins || b.rate - a.rate);
+  const shelf = gs.slice().sort((a, b) => (a.last || '').localeCompare(b.last || '')).slice(0, 3);
+
+  v.innerHTML = `<div class="tiles">
+      <div class="tile"><div class="v">${db.games.length}</div><div class="l">jeux</div></div>
+      <div class="tile"><div class="v">${db.plays.length}</div><div class="l">parties</div></div>
+      <div class="tile"><div class="v">≈ ${time}</div><div class="l">de jeu</div></div>
+      <div class="tile"><div class="v">${never}</div><div class="l">jamais joués</div></div></div>
+    ${top.length ? `<h3>Les plus joués</h3><div class="card">${top.map(x => `<button class="bar" data-game="${x.g.id}"><span class="name" style="font-size:15px">${esc(x.g.name)}</span><b>${x.count}</b><div class="track"><div class="fill" style="width:${x.count / max * 100}%"></div></div></button>`).join('')}</div>` : ''}
+    ${ranking.length ? `<h3>Victoires (parties à plusieurs)</h3><div class="card">${ranking.map(r => `<div class="rank">${avatar(r.p.id)}<div class="grow"><div class="name" style="font-size:15px">${esc(r.p.name)}</div><div class="meta">${r.wins} sur ${plural(r.multi, 'partie')}</div></div><span class="pct">${Math.round(r.rate * 100)} %</span></div>`).join('')}</div>` : ''}
+    ${shelf.length ? `<h3>À ressortir de l'étagère</h3>${shelf.map(x => `<button class="card item" data-game="${x.g.id}"><div class="grow"><div class="name">${esc(x.g.name)}</div><div class="meta">${x.last ? 'Dernière partie ' + ago(x.last) : 'Jamais joué'}</div></div></button>`).join('')}` : ''}`;
+}
+
+/* ---------- sheet ---------- */
+let sheetOpen = false;
+function openSheet(html) {
+  $('#sheet-body').innerHTML = html;
+  $('#sheet .panel').scrollTop = 0;
+  $('#sheet').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (!sheetOpen) { history.pushState({sheet: 1}, ''); sheetOpen = true; }
+}
+function closeSheet() { if (sheetOpen) history.back(); }
+window.addEventListener('popstate', () => {
+  if (sheetOpen) { sheetOpen = false; $('#sheet').classList.remove('open'); document.body.style.overflow = ''; }
+});
+
+/* ---------- games ---------- */
+function openGame(id) {
+  const g = game(id); if (!g) return;
+  const s = gameStats(id), wins = {};
+  s.plays.filter(p => p.results.length > 1).forEach(p => winners(p).forEach(w => wins[w] = (wins[w] || 0) + 1));
+  const wl = Object.entries(wins).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  openSheet(`<h2>${esc(g.name)}</h2><div class="meta">${gameMeta(g)}</div>
+    <div class="tiles three">
+      <div class="tile"><div class="v">${s.count}</div><div class="l">${s.count > 1 ? 'parties' : 'partie'}</div></div>
+      <div class="tile"><div class="v">${s.last ? shortDate(s.last) : '—'}</div><div class="l">dernière</div></div>
+      <div class="tile"><div class="v">${s.record ? s.record.score : '—'}</div><div class="l">${s.record ? 'record · ' + esc(pname(s.record.playerId)) : 'record'}</div></div></div>
+    ${wl.length ? `<h3>Victoires</h3><div class="winlist">${wl.map(([pid, n]) => `<span class="pill">${avatar(pid)} ${esc(pname(pid))} <b>${n}</b></span>`).join('')}</div>` : ''}
+    ${s.count ? `<h3>Dernières parties</h3>${s.plays.slice(0, 5).map(playCard).join('')}` : ''}
+    <div class="actions"><button class="btn ghost" data-act="editGame" data-id="${id}">Modifier</button><button class="btn primary" data-act="newPlay" data-id="${id}">Nouvelle partie</button></div>`);
+}
+function gameForm(id) {
+  const g = id ? game(id) : {name: '', min: 2, max: 4, duration: ''};
+  openSheet(`<h2>${id ? 'Modifier le jeu' : 'Nouveau jeu'}</h2><form id="f">
+    <label>Nom<input name="nom" required autocomplete="off" value="${esc(g.name)}"></label>
+    <div class="two"><label>Joueurs min<input name="min" type="number" inputmode="numeric" min="1" value="${g.min}"></label>
+      <label>Joueurs max<input name="max" type="number" inputmode="numeric" min="1" value="${g.max}"></label></div>
+    <label>Durée d'une partie (minutes)<input name="duration" type="number" inputmode="numeric" min="1" value="${g.duration ?? ''}"></label>
+    <div class="actions">${id ? `<button type="button" class="btn ghost danger" data-act="delGame" data-id="${id}">Supprimer</button>` : ''}<button class="btn primary">Enregistrer</button></div></form>`);
+  if (!id) setTimeout(() => $("#f").nom.focus(), 260);
+  $('#f').onsubmit = e => {
+    e.preventDefault();
+    const f = e.target, name = f.nom.value.trim(); if (!name) return;
+    let min = Math.max(1, +f.min.value || 1), max = Math.max(1, +f.max.value || min);
+    if (max < min) [min, max] = [max, min];
+    const duration = +f.duration.value || null;
+    if (id) Object.assign(g, {name, min, max, duration});
+    else db.games.push({id: uid(), name, min, max, duration, created: Date.now()});
+    save(); closeSheet(); render(); toast(id ? 'Jeu modifié' : 'Jeu ajouté');
+  };
+}
+
+/* ---------- plays ---------- */
+function playForm(id, presetGame) {
+  if (!db.games.length) { toast("Ajoute d'abord un jeu"); return; }
+  const p = id ? db.plays.find(x => x.id === id) : {gameId: presetGame || '', date: today(), results: [], note: ''};
+  if (!p) return;
+  const sel = Object.fromEntries(p.results.map(r => [r.playerId, r.score]));
+  openSheet(`<h2>${id ? 'Modifier la partie' : 'Nouvelle partie'}</h2><form id="f">
+    <label>Jeu<select name="game" required><option value="">Choisir…</option>${db.games.slice().sort(byName).map(g => `<option value="${g.id}" ${g.id === p.gameId ? 'selected' : ''}>${esc(g.name)}</option>`).join('')}</select></label>
+    <label>Date<input type="date" name="date" required value="${p.date}"></label>
+    <div class="lbl">Joueurs et points <span id="pcount"></span></div>
+    ${db.players.length ? `<div class="plist">${db.players.slice().sort(byName).map(pl => `<div class="prow" data-pid="${pl.id}">
+        <label class="pcheck"><input type="checkbox" ${pl.id in sel ? 'checked' : ''}>${avatar(pl.id)}<span>${esc(pl.name)}</span></label>
+        <input class="score" type="number" inputmode="numeric" placeholder="Points" value="${sel[pl.id] ?? ''}"></div>`).join('')}</div>`
+      : `<p class="warn">Aucun joueur pour l'instant. Crée-les dans l'onglet Joueurs.</p>`}
+    <p id="pwarn" class="warn" hidden></p>
+    <label>Note (facultatif)<textarea name="note" rows="2" placeholder="Extension, variante, moment marquant…">${esc(p.note || '')}</textarea></label>
+    <div class="actions">${id ? `<button type="button" class="btn ghost danger" data-act="delPlay" data-id="${id}">Supprimer</button>` : ''}<button class="btn primary">Enregistrer</button></div></form>`);
+  const f = $('#f');
+  const rows = () => [...f.querySelectorAll('.prow')];
+  const upd = () => {
+    rows().forEach(r => r.classList.toggle('on', r.querySelector('[type=checkbox]').checked));
+    const n = rows().filter(r => r.classList.contains('on')).length;
+    $('#pcount').textContent = n ? `· ${plural(n, 'joueur')}` : '';
+    const g = game(f.game.value), w = $('#pwarn');
+    if (g && n && (n < g.min || n > g.max)) { w.hidden = false; w.textContent = `${g.name} se joue normalement à ${playersLabel(g)}.`; } else w.hidden = true;
+  };
+  f.addEventListener('change', upd);
+  f.addEventListener('input', e => {
+    if (e.target.classList.contains('score') && e.target.value !== '') {
+      const cb = e.target.closest('.prow').querySelector('[type=checkbox]');
+      if (!cb.checked) { cb.checked = true; upd(); }
+    }
+  });
+  upd();
+  f.onsubmit = e => {
+    e.preventDefault();
+    if (!f.game.value) { toast('Choisis un jeu'); return; }
+    const results = rows().filter(r => r.classList.contains('on')).map(r => {
+      const v = r.querySelector('.score').value;
+      return {playerId: r.dataset.pid, score: v === '' ? null : Number(v)};
+    });
+    if (!results.length) { toast('Sélectionne au moins un joueur'); return; }
+    const data = {gameId: f.game.value, date: f.date.value || today(), results, note: f.note.value.trim()};
+    if (id) Object.assign(p, data); else db.plays.push({id: uid(), created: Date.now(), ...data});
+    save(); closeSheet(); render(); toast(id ? 'Partie modifiée' : 'Partie enregistrée');
+  };
+}
+
+/* ---------- players ---------- */
+function playerForm(id) {
+  const p = id ? player(id) : {name: '', color: COLORS[db.players.length % COLORS.length]};
+  openSheet(`<h2>${id ? 'Modifier le joueur' : 'Nouveau joueur'}</h2><form id="f">
+    <label>Prénom ou pseudo<input name="nom" required autocomplete="off" value="${esc(p.name)}"></label>
+    <div class="lbl">Couleur</div><div class="swatches">${COLORS.map(c => `<label><input type="radio" name="color" value="${c}" ${c === p.color ? 'checked' : ''}><span style="background:${c}"></span></label>`).join('')}</div>
+    <div class="actions">${id ? `<button type="button" class="btn ghost danger" data-act="delPlayer" data-id="${id}">Supprimer</button>` : ''}<button class="btn primary">Enregistrer</button></div></form>`);
+  if (!id) setTimeout(() => $("#f").nom.focus(), 260);
+  $('#f').onsubmit = e => {
+    e.preventDefault();
+    const f = e.target, name = f.nom.value.trim(); if (!name) return;
+    const color = f.color.value || COLORS[0];
+    if (id) Object.assign(p, {name, color}); else db.players.push({id: uid(), name, color});
+    save(); closeSheet(); render(); toast(id ? 'Joueur modifié' : 'Joueur ajouté');
+  };
+}
+
+/* ---------- backup ---------- */
+function openSettings() {
+  openSheet(`<h2>Sauvegarde</h2>
+    <p class="muted">Tes données sont enregistrées sur ce téléphone uniquement. Exporte-les de temps en temps pour ne rien perdre en cas de changement de téléphone ou de nettoyage du navigateur.</p>
+    <div class="stack"><button class="btn primary" data-act="export">Exporter mes données</button>
+      <label class="btn ghost" style="color:var(--ink);font-size:16px">Importer une sauvegarde<input id="imp" type="file" accept=".json,application/json" hidden></label></div>
+    <p class="meta center">${db.games.length} jeux · ${plural(db.plays.length, 'partie')} · ${plural(db.players.length, 'joueur')}</p>`);
+  $('#imp').onchange = e => {
+    const file = e.target.files[0]; if (!file) return;
+    file.text().then(t => {
+      const d = JSON.parse(t);
+      if (!d || !Array.isArray(d.games) || !Array.isArray(d.plays) || !Array.isArray(d.players)) throw 0;
+      if (!confirm(`Remplacer les données actuelles par cette sauvegarde (${d.games.length} jeux, ${d.plays.length} parties) ?`)) return;
+      db = {games: d.games, players: d.players, plays: d.plays};
+      save(); closeSheet(); render(); toast('Sauvegarde importée');
+    }).catch(() => toast('Fichier de sauvegarde invalide'));
+  };
+}
+function exportData() {
+  const blob = new Blob([JSON.stringify({app: 'ludotheque', version: 1, exported: new Date().toISOString(), ...db}, null, 2)], {type: 'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = `ludotheque-${today()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  toast('Sauvegarde téléchargée');
+}
+
+/* ---------- actions ---------- */
+const actions = {
+  add: () => ({games: () => gameForm(), plays: () => playForm(), players: () => playerForm()})[state.tab]?.(),
+  close: closeSheet,
+  settings: openSettings,
+  export: exportData,
+  editGame: t => gameForm(t.dataset.id),
+  newPlay: t => playForm(null, t.dataset.id),
+  delGame: t => {
+    const id = t.dataset.id, n = db.plays.filter(p => p.gameId === id).length;
+    if (!confirm(n ? `Supprimer ce jeu et ses ${plural(n, 'partie')} ?` : 'Supprimer ce jeu ?')) return;
+    db.games = db.games.filter(g => g.id !== id); db.plays = db.plays.filter(p => p.gameId !== id);
+    save(); closeSheet(); render(); toast('Jeu supprimé');
+  },
+  delPlay: t => {
+    if (!confirm('Supprimer cette partie ?')) return;
+    db.plays = db.plays.filter(p => p.id !== t.dataset.id);
+    save(); closeSheet(); render(); toast('Partie supprimée');
+  },
+  delPlayer: t => {
+    const id = t.dataset.id, n = db.plays.filter(p => p.results.some(r => r.playerId === id)).length;
+    if (n) { alert(`Ce joueur apparaît dans ${plural(n, 'partie')} : il ne peut pas être supprimé. Tu peux le renommer.`); return; }
+    if (!confirm('Supprimer ce joueur ?')) return;
+    db.players = db.players.filter(p => p.id !== id);
+    save(); closeSheet(); render(); toast('Joueur supprimé');
+  },
+};
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-tab],[data-sort],[data-game],[data-play],[data-player],[data-act]');
+  if (!t) return;
+  if (t.dataset.tab) { state.tab = t.dataset.tab; render(); window.scrollTo(0, 0); }
+  else if (t.dataset.sort) { state.sort = t.dataset.sort; renderGames(); }
+  else if (t.dataset.game) openGame(t.dataset.game);
+  else if (t.dataset.play) playForm(t.dataset.play);
+  else if (t.dataset.player) playerForm(t.dataset.player);
+  else if (t.dataset.act) actions[t.dataset.act]?.(t);
+});
+
+let toastTimer;
+function toast(msg) {
+  const el = $('#toast'); el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+}
+
+render();
+if (navigator.storage?.persist) navigator.storage.persist().catch(() => {});
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
